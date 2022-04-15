@@ -1,0 +1,6 @@
+classes:
+  stamp_color: ["red", "black", "blue"]
+  stamp_shape: ["circle", "rectangle", "ellipse", "diamond"]
+  common_license: [""]
+
+data_path: "/mnt/resource/liufn/datasets/labelme_data/seal_detect/检测用_save"
