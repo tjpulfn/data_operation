@@ -4,74 +4,21 @@
 @description : 
 使用RPA生成的数据，部分标注后，生成labelme标注格式，后生成pgnet输入格式
 """
-from cProfile import label
 import os
 import json
 import cv2
 import math
-import pprint
+import uuid
 import glob
 import random
 import numpy as np
 from PIL import Image, ImageFont, ImageDraw, ImageFilter
-# from data_preprocess import rotate_rndom_angle
 import sys
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(__dir__)
 sys.path.append(os.path.abspath(os.path.join(__dir__, '..')))
-from data_aug.rotate_img import rotate_rndom_angle
-import uuid
-import time
-def change_name():
-    image_path = '/Users/liufn/Desktop/BaiDuYun/dataset/印章/识别用/生成数据/第一批_350/911201125877383612_门诊收费专用章_6'
-    label_path = '{}'.format(image_path)
-    save_dir = '{}a'.format(image_path)
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-    
-    for image_file in os.listdir(image_path):
-        if image_file.endswith('.png'):
-            index = str(uuid.uuid1())
-            base_name = os.path.splitext(image_file)[0]
-            label_file = os.path.join(label_path, base_name + '.json')
-            new_name = '{}'.format(index)
-            image = cv2.imread(os.path.join(image_path, image_file))
-            os.system(
-                'mv {} {}'.format(os.path.join(image_path, image_file), os.path.join(save_dir, str(new_name) + '.png')))
-            # cv2.imwrite(os.path.join(save_dir, str(new_name) + '.png'), image)
-            os.system('mv {} {}'.format(label_file, os.path.join(save_dir, str(new_name) + '.json')))
-            # index += 1
-            
-
-def fakeData2Labelme():
-    ori_json = "/Users/liufn/Desktop/BaiDuYun/生成印章原始数据/batch2/12_18_5_0/之充顺塚嗻郓肣湮呵荪抜_www.395.net.cn_alpha.json"
-    with open(ori_json) as fr:
-        label_dict = json.load(fr)
-    ori_shapes = label_dict["shapes"]
-    image_dir = "/Users/liufn/Desktop/BaiDuYun/生成印章原始数据/batch2/12_18_5_0"
-    for image_file in os.listdir(image_dir):
-        if image_file.endswith('g'):
-            image = cv2.imread(os.path.join(image_dir, image_file))
-            base_name = os.path.splitext(image_file)[0]
-            print(base_name)
-            h, w = image.shape[0:2]
-            labelme_dict = {"version": "4.5.7", "flags": {}}
-            json_file = open(os.path.join(image_dir, base_name + '.json'), 'w', encoding="utf-8")
-            shapes = []
-            for sub_shape in ori_shapes:
-                sub_label = sub_shape["label"]
-                sub_points = sub_shape["points"]
-                angle = 0
-                _, sub_points = rotate_rndom_angle(image, angle, [sub_points])
-                shapes.append({"label": sub_label, "points": sub_points[0], "group_id": None, "shape_type": "polygon", "flags": {}})
-            labelme_dict.update({"shapes": shapes})
-            labelme_dict.update({"imagePath": "{}.png".format(base_name)})
-            labelme_dict.update({"imageData": None})
-            labelme_dict.update({"imageHeight": h})
-            labelme_dict.update({"imageWidth": w})
-            json_str = json.dumps(labelme_dict, indent=4)
-            json_file.write(json_str)
-
+from base_method import RotateImgWithBox as rib
+      
 def add_alpha_channel(img):
     """ 为jpg图像添加alpha通道 """
     b_channel, g_channel, r_channel = cv2.split(img) # 剥离jpg图像通道
@@ -103,9 +50,9 @@ def hsv2rgb(h, s, v):
 def fakeData2PgNet(fw):
     bg_image_list = glob.glob("/mnt/resource/liufn/code/seal_erase/document_images" + "/*g")
     img_wl = Image.open("/mnt/resource/liufn/code/data_operation/data_generate/wenli.png")
-    image_dir = '/mnt/resource/liufn/datasets/trocr/stamp/fake_seal_py/save_stamp1/'
+    image_dir = '/mnt/resource/liufn/datasets/trocr/stamp/fake_seal_psd/'
     image_list = glob.glob(image_dir  + "/*/*.png")
-    save_dir = "/mnt/resource/liufn/datasets/trocr/stamp/fake_seal_py/train1"
+    save_dir = "/mnt/resource/liufn/datasets/trocr/stamp/fake_seal_psd/train2"
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     for img_file in image_list:
@@ -125,7 +72,7 @@ def fakeData2PgNet(fw):
             hg, wg = image.shape[0:2]
         if random.random() > 0.3 and(np.abs(hg - wg) < 30):
             angle = random.randint(0, 359)
-            image, _ = rotate_rndom_angle(image, angle, points=None, bbox=False)
+            image, _ = rib.rotate_rndom_angle(image, angle, points=None, bbox=False)
             hg, wg = image.shape[0:2]
         if random.random() > 0.1:
             image = Image.fromarray(image.astype('uint8')).convert('RGBA')
@@ -140,8 +87,6 @@ def fakeData2PgNet(fw):
                 for l in range(L):
                     dot = (l, hi)
                     image.putpixel(dot, image.getpixel(dot)[:3]+(int(img_wl_random.getpixel(dot)/255*image.getpixel(dot)[3]),))
-            # import pdb
-            # pdb.set_trace()
             image = np.array(image)
             hg, wg = image.shape[0:2]
         if random.random() > 0.3:
@@ -222,32 +167,3 @@ def merge_img(jpg_img, png_img, y1, y2, x1, x2):
 fw = open("/mnt/resource/liufn/datasets/trocr/stamp/fake_seal_py/train1.txt", "w")
 for i in range(1):
     fakeData2PgNet(fw)
-# with open("/mnt/resource/liufn/datasets/trocr/stamp/fake_seal_py/save_stamp1/stamp_6char_1000.txt") as fr:
-#     fr_lines = fr.readlines()
-# for line in fr_lines:
-#     name, label = line.strip().split("\t")
-#     base_name = os.path.splitext(name)[0]
-#     with open(os.path.join("/mnt/resource/liufn/datasets/trocr/stamp/fake_seal_py/save_stamp1/stamp_6char_1000", base_name + ".txt"), "w") as fw:
-#         fw.write(label)
-# dirs = "/mnt/resource/liufn/datasets/trocr/stamp/true_data/true_seal_data/true_data_without#x/test_data"
-# # save_dir = "/mnt/resource/liufn/datasets/trocr/stamp/true_data/true_seal_data/true_data_without#x/test_data"
-# # if not os.path.exists(save_dir):
-# #     os.makedirs(save_dir)
-# with open("/mnt/resource/liufn/datasets/trocr/stamp/true_data/true_seal_data/true_data_without#x/test_data.txt", "w") as fw:
-#     for files in os.listdir(dirs):
-#         if files.endswith("txt"):
-#             base_name = os.path.splitext(files)[0]
-#             # txt_file = os.path.join(dirs, base_name + ".txt")
-#             # print(txt_file)
-#             # if not os.path.exists(txt_file):
-#             #     continue
-#             # if random.random() > 0.9:
-#             #     print(base_name)
-#             #     os.system("mv {} {}".format(os.path.join(dirs, files), os.path.join(save_dir, files)))
-#             #     os.system("mv {} {}".format(txt_file, os.path.join(save_dir, base_name + ".txt")))
-#             with open(os.path.join(dirs, files)) as fr:
-#                 fr_lines = fr.readlines()
-#             for line in fr_lines:
-#                 if line == "\n":
-#                     continue
-#                 fw.write(files + "\t" + line.strip() + "\n")
