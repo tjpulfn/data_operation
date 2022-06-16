@@ -9,7 +9,7 @@ __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(__dir__)
 sys.path.append(os.path.abspath(os.path.join(__dir__, '..')))
 from base_method.baseMethod import findAllFile
-from data_aug.crop import crop_image_with_point
+# from data_aug.crop import crop_image_with_point
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--save", default=False)

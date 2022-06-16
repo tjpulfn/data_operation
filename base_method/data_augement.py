@@ -261,11 +261,13 @@ def random_optics(image, aug_type="", ratio=0.5):
     return res
 
 if __name__ == '__main__':
-    opts = OpticTransormation()
-    im = cv2.imread("/Users/liufn/Desktop/psd_files/psd_0518_png/psd_0518_0_4_0.png")
-    for i in range(50):
-        res = opts.GridDistortion(im)
-        cv2.namedWindow("show", 0)
-        cv2.imshow("show", res)
-        cv2.waitKey(0)
+    # opts = OpticTransormation()
+    # im = cv2.imread("/Users/liufn/Desktop/psd_files/psd_0518_png/psd_0518_0_4_0.png")
+    # for i in range(50):
+    #     res = opts.GridDistortion(im)
+    #     cv2.namedWindow("show", 0)
+    #     cv2.imshow("show", res)
+    #     cv2.waitKey(0)
+    root_dir = ""
+    
     

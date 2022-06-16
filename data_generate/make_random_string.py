@@ -32,7 +32,7 @@ def get_words_digits(count):
 
 def read_all_files():
     lines_dict = {}
-    for i in range(0, 22):
+    for i in range(0, 100):
         file_path = "/Users/liufn/python/data_operation/data_generate/company_files/all_company_{}.txt".format(i)
         if os.path.exists(file_path):
             with open(file_path) as fr:
@@ -58,4 +58,5 @@ def write_global_files(root_path):
                     fr_line = fr.readline()
                 fw.write(file_name + "\t" + fr_line + "\n")
 
-write_global_files("/Users/liufn/Desktop/BaiDuYun/dataset/印章/训练集/识别用/训练集/五一后/印章标注labelme5490张_random/true_data_without#x_aug")
+# write_signle_files("/Users/liufn/Desktop/psd_files/psd_0523_epllise_21_png")
+# write_global_files("/Users/liufn/Desktop/BaiDuYun/dataset/印章/训练集/识别用/训练集/五一后/印章标注labelme5490张_random/true_data_without#x_aug")

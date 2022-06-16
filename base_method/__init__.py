@@ -11,3 +11,4 @@ from base_method.baseMethod import SplitData
 from base_method.baseMethod import ReadLabelme
 from base_method.baseMethod import RotateImgWithBox
 from base_method.data_augement import random_optics
+from base_method.baseMethod import compute_iou

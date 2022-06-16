@@ -65,8 +65,8 @@ def fakeData2PgNet(fw):
         h, w = bgImgae.shape[0:2]
         crop_name = str(uuid.uuid1())
         image = cv2.imread(img_file, cv2.IMREAD_UNCHANGED)
-        hg, wg = image.shape[0:2]
-        if random.random() > 0:
+        hg, wg = image.shape[0:2]    
+        if random.random() > 0.1:
             scale = random.randint(4,8) * 0.1
             image = cv2.resize(image, (int(wg * scale), int(hg * scale)))
             hg, wg = image.shape[0:2]
